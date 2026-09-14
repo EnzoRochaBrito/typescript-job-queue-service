@@ -35,4 +35,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 node_modules/
 dist/
 
-/generated/prisma
+prisma/generated
+prisma/migrations
+
+proto/*.ts
+proto/google

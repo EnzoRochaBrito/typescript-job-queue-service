@@ -1,15 +1,5 @@
-# jobqueueservice
+# JobQueueService
 
-To install dependencies:
+Job processing and scheduling in TypeScript backed by PostgreSQL for persistence.
 
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.4.0. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+Create queues, generate workers and publish jobs with ease.
