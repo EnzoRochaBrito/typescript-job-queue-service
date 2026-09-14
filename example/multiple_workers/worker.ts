@@ -17,7 +17,7 @@ export class CompressImageWorker extends WorkerClient<CompressImageJob> {
         console.log("Worker created")
     }
 
-    override async execute(job: ClassFields<Job<CompressImageJob>>): Promise<void> {
+    override async work(job: ClassFields<Job<CompressImageJob>>): Promise<void> {
         this.log(`recieved job (${this.concurrentJobs})`)
         
         this.log(`fetching image from bucket`)

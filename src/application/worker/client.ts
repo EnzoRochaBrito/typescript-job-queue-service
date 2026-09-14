@@ -26,13 +26,22 @@ export abstract class WorkerClient<T=any> {
         this.heartbeatIntervalID = this.startHeartbeat()
     }
 
-    abstract execute(job: ClassFields<Job<T>>): void;
+    abstract work(job: ClassFields<Job<T>>): void;
 
     protected ack(job: ClassFields<Job<T>>): void {
         this.queueClient.ack({
             jobID: job.ID,
             workerID: this.workerID
         }, () => {})
+    }
+    
+    private execute(job: ClassFields<Job<T>>): void {
+        try {
+            this.work(job)
+            this.ack(job)
+        } catch {
+            this.error(job)
+        }
     }
 
     protected error(job: ClassFields<Job<T>>): void {
