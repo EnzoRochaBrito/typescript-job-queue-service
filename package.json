@@ -1,0 +1,29 @@
+{
+  "name": "job_queue_service",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^26.3.0",
+    "@types/pg": "^8.23.1",
+    "grpc-tools": "^1.13.1",
+    "prisma": "7.10.0",
+    "ts-proto": "^2.12.1"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.4",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "7.10.0",
+    "dotenv": "^17.4.2",
+    "pg": "^8.23.0"
+  },
+  "scripts": {
+    "db:gen": "prisma generate",
+    "db:mig": "prisma migrate dev",
+    "proto:gen": "protoc -I ./proto --plugin=./node_modules/.bin/protoc-gen-ts_proto.exe --ts_proto_out=./proto --ts_proto_opt=outputServices=grpc-js ./proto/*.proto"
+  }
+}

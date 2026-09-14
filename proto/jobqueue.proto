@@ -1,0 +1,60 @@
+syntax = "proto3";
+import "google/protobuf/struct.proto";
+
+service Queue {
+    rpc CreateQueue(CreateQueueRequest) returns (SuccessBoolResponse);
+    rpc Push(PushRequest) returns (SuccessBoolResponse);
+    rpc ListenQueue(ListenQueueRequest) returns (stream ListenQueueStreamResponse);
+    rpc DeleteQueue(DeleteQueueRequest) returns (SuccessBoolResponse);
+    rpc Hearthbeat(HearthbeatRequest) returns (SuccessBoolResponse);
+    rpc Ack(JobInfoRequest) returns (SuccessBoolResponse);
+    rpc Error(JobInfoRequest) returns (SuccessBoolResponse);
+}
+
+message CreateQueueRequest {
+    string queueName = 1;
+}
+
+message PushRequest {
+    string queueId = 1;
+    google.protobuf.Struct jobData = 2;
+    optional google.protobuf.Struct metadata = 3;
+}
+
+message ListenQueueRequest {
+    string queue = 1;
+    int32 concurrency = 2;
+}
+
+message DeleteQueueRequest {
+    string queueId = 1;
+}
+
+message ListenQueueStreamResponse {
+    oneof response {
+        QueueConnectResponse queue_connect_response = 1;
+        JobDataResponse job_data_response = 2;
+    }
+}
+
+message JobDataResponse {
+    google.protobuf.Struct jobData = 1;
+}
+
+message QueueConnectResponse {
+    string workerId = 1;
+}
+
+
+message SuccessBoolResponse {
+    bool success = 1;
+}
+
+message HearthbeatRequest {
+    string worker = 1;
+}
+
+message JobInfoRequest {
+    string jobID = 1;
+    string workerID = 2;
+}

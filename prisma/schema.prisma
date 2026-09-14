@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model Queue {
+  name String @id
+  jobs Job[]
+  created_at DateTime @default(now())
+}
+
+enum JobStatus {
+  Available
+  Executing
+  Retryable
+  Completed
+  Discarded
+}
+
+model Job {
+  id String @id @default(uuid())
+  queue Queue @relation(fields: [queue_name], references: [name])
+  queue_name String
+  metadata Json
+  data Json
+  status JobStatus
+  created_at DateTime @default(now())
+  lease_until DateTime?
+  @@index([status, created_at])
+  @@index([status, lease_until])
+}
