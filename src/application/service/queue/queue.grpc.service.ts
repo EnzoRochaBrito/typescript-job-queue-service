@@ -75,11 +75,11 @@ export class JobQueueGrpcService implements GrpcServerImplementation<QueueServer
     }
 
     listenQueue(ssc: ServerWritableStream<ListenQueueRequest, ListenQueueStreamResponse>) {
-        const { queue } = ssc.request
+        const { queue, concurrency } = ssc.request
 
         const worker = WorkerInstance.create({
             queue,
-            concurrency: 5
+            concurrency: concurrency
         }, ssc)
 
         console.log("worker connected", worker.ID)
