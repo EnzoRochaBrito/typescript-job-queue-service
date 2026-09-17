@@ -1,3 +1,4 @@
+import type { WorkerCleaner } from "../../domain/worker/cleaner"
 import type { WorkerRegistry } from "../../domain/worker/worker.registry"
 import type { WorkerHeartBeatMessage, WorkerHeartBeatResult } from "./workerHeartBeat"
 
@@ -6,7 +7,8 @@ export class WorkerHeartbeat {
     private readonly heartbeatWorker: Worker
 
     constructor(
-        private readonly workerRegistry: WorkerRegistry
+        private readonly workerRegistry: WorkerRegistry,
+        private readonly workerCleaner: WorkerCleaner
     ) {
         this.heartbeatWorker = new Worker(new URL("./workerHeartBeat.ts", import.meta.url).href)
         this.loadHeartbeatMessageHandler()
@@ -23,7 +25,7 @@ export class WorkerHeartbeat {
         this.heartbeatWorker.onmessage = (ev: Bun.MessageEvent<WorkerHeartBeatResult>) => {
             const { data } = ev
             data.forEach(silentWorkerID => {
-                this.workerRegistry.remove(silentWorkerID)
+                this.workerCleaner.clean(this.workerRegistry.get(silentWorkerID)!)
             })
         }
     }

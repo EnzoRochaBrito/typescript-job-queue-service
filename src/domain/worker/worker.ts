@@ -9,6 +9,8 @@ export type WorkerConnection = grpc.ServerWritableStream<ListenQueueRequest, Lis
 
 export class WorkerInstance {
 
+    private executingJobs: Set<string> = new Set<string>()
+
     constructor(
         public readonly ID: string,
         public readonly queue: string,
@@ -34,18 +36,28 @@ export class WorkerInstance {
         return this.currentConcurrentJobs < this.concurrency
     }
 
-    ack() {
+    ack(jobID: string) {
+
+        this.executingJobs.delete(jobID)
+
         if (this.currentConcurrentJobs > 0)
             this.currentConcurrentJobs--
         eventBus.emit("queue:available", { queueName: this.queue })
     }
 
     sendJob(job: Job): void {
+
+        this.executingJobs.add(job.ID)
+
         this.currentConcurrentJobs++
         this.grpcConnectionObject.write({
             jobDataResponse: {
                 jobData: job
             }
         })
+    }
+
+    getExecutingJobsIterable() {
+        return this.executingJobs.values()
     }
 }

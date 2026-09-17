@@ -12,14 +12,14 @@ import { WorkerHeartbeat } from "../../../worker/heartbeat/class";
 
 export class JobQueueGrpcService implements GrpcServerImplementation<QueueServer> {
 
-    private readonly workerHeartbeat: WorkerHeartbeat
-
+    
     constructor(
         private readonly queueService: IQueueService,
         private readonly workerRegistry: WorkerRegistry,
         private readonly queueRegistry: QueueRegistry,
+        private readonly workerHeartbeat: WorkerHeartbeat,
     ) {
-        this.workerHeartbeat = new WorkerHeartbeat(this.workerRegistry)
+        
     }
 
     createQueue(call: ServerUnaryCall<CreateQueueRequest, SuccessBoolResponse>, callback: sendUnaryData<SuccessBoolResponse>) {
@@ -142,7 +142,7 @@ export class JobQueueGrpcService implements GrpcServerImplementation<QueueServer
     ack(call: ServerUnaryCall<JobInfoRequest, SuccessBoolResponse>, callback: sendUnaryData<SuccessBoolResponse>) {
         const { jobID, workerID } = call.request
         
-        this.workerRegistry.get(workerID)?.ack()
+        this.workerRegistry.get(workerID)?.ack(jobID)
 
         this.queueService.ack(jobID)
             .then(_ => {
@@ -160,7 +160,7 @@ export class JobQueueGrpcService implements GrpcServerImplementation<QueueServer
     error(call: ServerUnaryCall<JobInfoRequest, SuccessBoolResponse>, callback: sendUnaryData<SuccessBoolResponse>) {
         const { jobID, workerID } = call.request
 
-        this.workerRegistry.get(workerID)?.ack()
+        this.workerRegistry.get(workerID)?.ack(jobID)
 
         this.queueService.error(jobID)
             .then(_ => {

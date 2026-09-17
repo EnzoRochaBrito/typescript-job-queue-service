@@ -12,6 +12,7 @@ import { loadDBListener } from "../infra/db/db.event.listener";
 import { startGrpcServer } from "./startGrpcServer";
 import { PrismaDatabaseConnection } from "../infra/db/prisma.db";
 import { queueFactory } from "../domain/queue/factory";
+import { WorkerCleaner } from "../domain/worker/cleaner";
 
 type BootstrapConfig = {
     databaseUrl: string,
@@ -27,17 +28,21 @@ export async function bootstrap(config: BootstrapConfig) {
 
     const queueService = new JobQueueService(databaseConnection)
 
+    const workerCleaner = new WorkerCleaner(workerRegistry, databaseConnection)
+
+    const { producerWorker, heartbeatWorker } = loadWorkers({
+        queueRegistry: queueRegistry,
+        queueService: queueService,
+        workerRegistry: workerRegistry,
+        workerCleaner: workerCleaner
+    })
+
     const grpcQueueController = new JobQueueGrpcService(
         queueService,
         workerRegistry,
-        queueRegistry
+        queueRegistry,
+        heartbeatWorker
     )
-
-    const { cleanupWorker, heartbeatWorker, producerWorker } = loadWorkers({
-        queueRegistry: queueRegistry,
-        queueService: queueService,
-        workerRegistry: workerRegistry
-    })
 
     loadCreatedJobEventHandler(eventBus, producerWorker)
 
@@ -45,7 +50,7 @@ export async function bootstrap(config: BootstrapConfig) {
         producerWorker.popQueue(queueRegistry.get(queueName)!)
     })
 
-    const dbListener = loadDBListener(config.databaseUrl)
+    loadDBListener(config.databaseUrl)
 
     loadQueuesToRegistry(databaseConnection, queueRegistry, workerRegistry)
         .then(() => {
@@ -53,7 +58,7 @@ export async function bootstrap(config: BootstrapConfig) {
         });
 
 
-    const grpcServer = startGrpcServer(grpcQueueController, config.grpcPort)
+    startGrpcServer(grpcQueueController, config.grpcPort)
 
     const qFactory = queueFactory(queueRegistry, workerRegistry, queueService)
 

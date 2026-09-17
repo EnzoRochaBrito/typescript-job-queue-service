@@ -1,4 +1,5 @@
 import type { QueueRegistry } from "../domain/queue/queue.registry";
+import type { WorkerCleaner } from "../domain/worker/cleaner";
 import type { WorkerRegistry } from "../domain/worker/worker.registry";
 import { CleanupWorker } from "../worker/cleanup/class";
 import { WorkerHeartbeat } from "../worker/heartbeat/class";
@@ -9,6 +10,7 @@ type WorkersDependencies = {
     workerRegistry: WorkerRegistry,
     queueRegistry: QueueRegistry,
     queueService: IQueueService,
+    workerCleaner: WorkerCleaner
 }
 
 export function loadWorkers(dep: WorkersDependencies) {
@@ -16,7 +18,7 @@ export function loadWorkers(dep: WorkersDependencies) {
 
     cleanupWorker.init()
 
-    const heartbeatWorker = new WorkerHeartbeat(dep.workerRegistry)
+    const heartbeatWorker = new WorkerHeartbeat(dep.workerRegistry, dep.workerCleaner)
 
     const producerWorker = new QueueProducer(dep.queueService, dep.queueRegistry)
 

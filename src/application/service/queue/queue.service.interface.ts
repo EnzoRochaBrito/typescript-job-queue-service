@@ -1,4 +1,5 @@
 import type { Job } from "../../../domain/job/job";
+import type { JobMetadata } from "../../../domain/job/job.metadata";
 import type { Queue } from "../../../domain/queue/queue";
 
 export interface IQueueService {
