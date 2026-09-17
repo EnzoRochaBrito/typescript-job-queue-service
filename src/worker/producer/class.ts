@@ -23,6 +23,10 @@ export class QueueProducer {
     }
 
     async popQueue(queue: Queue) {
+
+        if (!queue.isAvailable())
+            return
+
         const job = await this.queueService.pop(queue)
 
         if (!job) {
