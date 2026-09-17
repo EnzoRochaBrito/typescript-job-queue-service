@@ -1,13 +1,11 @@
 import { credentials } from "@grpc/grpc-js"
 import { QueueClient } from "../../../proto/jobqueue"
 import type { ClassFields } from "../../types/extract.class.fields"
-import type { Job, JobDTO } from "../../domain/job/job"
+import type { Job } from "../../domain/job/job"
 
 type Connection = {
     address: string
 }
-
-type Handler = (job: ClassFields<Job>) => void | Promise<void>
 
 export abstract class WorkerClient<T=any> {
 
