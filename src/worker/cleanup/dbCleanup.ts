@@ -8,16 +8,20 @@ let workerDBConn: PrismaClient | undefined = undefined
 let poolIntervalID: NodeJS.Timeout | undefined = undefined
 let isInited: boolean = false
 
-async function cleanDb(c: PrismaClient) {
+const defaultCleanupTime = () => {
+    const targetDate = new Date()
+    targetDate.setDate(targetDate.getDate() - 7)
+    return targetDate
+}
+
+async function cleanDb(c: PrismaClient, date: Date = defaultCleanupTime()) {
     await c.job.deleteMany({
         where: {
             status: {
                 in: [JobStatus.Discarded, JobStatus.Completed]
             },
-            AND: {
-                lease_until: {
-                    lte: new Date()
-                }
+            created_at: {
+                lt: date
             }
         }
     })
