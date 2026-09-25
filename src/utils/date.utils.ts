@@ -9,3 +9,5 @@ export class DateUtils {
         return date
     }
 }
+
+export const secondToMillisecond = (s: number) => s * 1000

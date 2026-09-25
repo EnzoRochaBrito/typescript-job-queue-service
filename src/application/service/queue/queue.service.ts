@@ -5,12 +5,17 @@ import type { JobMetadata } from "../../../domain/job/job.metadata";
 import type { Queue } from "../../../domain/queue/queue";
 import type { PrismaDatabaseConnection } from "../../../infra/db/prisma.db";
 import type { IQueueService } from "./queue.service.interface";
+import type { JobSupervisor } from "../../../worker/producer/job.supervisor";
 
 export class JobQueueService implements IQueueService {
 
     constructor(
-        private readonly db: PrismaDatabaseConnection
-    ) { }
+        private readonly db: PrismaDatabaseConnection,
+        private readonly jobSupervisor: JobSupervisor
+    ) {
+        this.jobSupervisor
+            .bindTriggerEvent(this.unleashLongRunningJob)
+    }
 
     async create(queue: Queue): Promise<void> {
         try {
@@ -71,7 +76,7 @@ export class JobQueueService implements IQueueService {
             data: jobData.data,
             createdAt: jobData.created_at,
             status: jobData.status
-        }, jobData.metadata as any)
+        }, JSON.parse(jobData.metadata?.toString() || "{}") as any)
 
         return job
     }
@@ -134,19 +139,28 @@ export class JobQueueService implements IQueueService {
                 data: job.data,
                 metadata: JSON.stringify(job.getMetadata()),
                 status: JobStatus.Available,
+                lease_time: job.getMetadata().lease_time
             }
         })
     }
 
     async ack(jobID: string): Promise<void> {
-        await this.updateJobStatus(jobID, JobStatus.Completed)
+
+        this.updateJobStatus(jobID, JobStatus.Completed)
+            .then(_ => { })
+            .catch(e => console.log(e))
+
+        this.jobSupervisor.remove(jobID)
     }
 
     async error(jobID: string): Promise<void> {
         await this.db.$transaction(async (tx) => {
             const job = await tx.job.findUnique({
                 where: {
-                    id: jobID
+                    id: jobID,
+                    status: {
+                        notIn: [JobStatus.Discarded, JobStatus.Completed]
+                    }
                 },
             })
 
@@ -178,7 +192,18 @@ export class JobQueueService implements IQueueService {
                 status: status,
                 ...(metadata ? {
                     metadata: metadata
-                } : {})
+                } : { })
+            }
+        })
+    }
+
+    private async unleashLongRunningJob(jobID: string) {
+        this.db.job.update({
+            where: {
+                id: jobID
+            },
+            data: {
+                status: JobStatus.Retryable
             }
         })
     }

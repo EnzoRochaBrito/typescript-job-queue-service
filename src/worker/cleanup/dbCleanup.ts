@@ -8,20 +8,20 @@ let workerDBConn: PrismaClient | undefined = undefined
 let poolIntervalID: NodeJS.Timeout | undefined = undefined
 let isInited: boolean = false
 
-const defaultCleanupTime = () => {
+const getCleanupDateLimit = (days: number) => {
     const targetDate = new Date()
-    targetDate.setDate(targetDate.getDate() - 7)
+    targetDate.setDate(targetDate.getDate() - days)
     return targetDate
 }
 
-async function cleanDb(c: PrismaClient, date: Date = defaultCleanupTime()) {
+async function cleanDb(c: PrismaClient, ageInDays: number = 7) {
     await c.job.deleteMany({
         where: {
             status: {
                 in: [JobStatus.Discarded, JobStatus.Completed]
             },
             created_at: {
-                lt: date
+                lt: getCleanupDateLimit(ageInDays)
             }
         }
     })
@@ -56,9 +56,12 @@ self.onmessage = async (ev: Bun.MessageEvent<DBCleanupWorkerMessage>) => {
                 })
             
             await bootPrismaClient()
-
-            if (poolIntervalID === undefined)
-                poolIntervalID = setInterval(() => cleanDb(workerDBConn!), ev.data.delay ? ev.data.delay * 1000 : 60000)
+            if (poolIntervalID === undefined) {
+                const { jobAge } = ev.data
+                poolIntervalID = setInterval(
+                    () => cleanDb(workerDBConn!, jobAge), ev.data.delay ? ev.data.delay * 1000 : 60000
+                )
+            }
 
             break
 
@@ -80,7 +83,11 @@ type InitDBCleanupWorker = {
     /**
      * In seconds
      */
-    delay?: number
+    delay?: number,
+    /**
+     * In days
+     */
+    jobAge?: number,
 }
 
 type CloseDBCleanupWorker = {

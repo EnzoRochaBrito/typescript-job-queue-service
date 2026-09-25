@@ -1,4 +1,5 @@
 export interface JobMetadata {
+    lease_time?: number,
     retry?: JobRetryMeta,
     lifetime?: JobLifetimeMeta,
     priority?: number,

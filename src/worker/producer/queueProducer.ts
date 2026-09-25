@@ -1,5 +1,4 @@
 import type { BunMessageEvent } from "bun"
-import { requestWorker } from "../request"
 
 declare const self: Worker
 

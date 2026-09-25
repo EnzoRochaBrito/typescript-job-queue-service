@@ -13,6 +13,7 @@ import { startGrpcServer } from "./startGrpcServer";
 import { PrismaDatabaseConnection } from "../infra/db/prisma.db";
 import { queueFactory } from "../domain/queue/factory";
 import { WorkerCleaner } from "../domain/worker/cleaner";
+import { JobSupervisor } from "../worker/producer/job.supervisor";
 
 type BootstrapConfig = {
     databaseUrl: string,
@@ -20,21 +21,21 @@ type BootstrapConfig = {
 }
 
 export async function bootstrap(config: BootstrapConfig) {
-
     const workerRegistry = new WorkerRegistry()
     const queueRegistry = new QueueRegistry()
 
     const databaseConnection = new PrismaDatabaseConnection(config.databaseUrl)
-
-    const queueService = new JobQueueService(databaseConnection)
-
+    const jobSupervisor = new JobSupervisor()
+    
+    const queueService = new JobQueueService(databaseConnection, jobSupervisor)
     const workerCleaner = new WorkerCleaner(workerRegistry, databaseConnection)
 
     const { producerWorker, heartbeatWorker } = loadWorkers({
         queueRegistry: queueRegistry,
         queueService: queueService,
         workerRegistry: workerRegistry,
-        workerCleaner: workerCleaner
+        workerCleaner: workerCleaner,
+        jobSupervisor: jobSupervisor
     })
 
     const grpcQueueController = new JobQueueGrpcService(

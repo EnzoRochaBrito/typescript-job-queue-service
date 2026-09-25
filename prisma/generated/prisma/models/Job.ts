@@ -20,8 +20,18 @@ export type JobModel = runtime.Types.Result.DefaultSelection<Prisma.$JobPayload>
 
 export type AggregateJob = {
   _count: JobCountAggregateOutputType | null
+  _avg: JobAvgAggregateOutputType | null
+  _sum: JobSumAggregateOutputType | null
   _min: JobMinAggregateOutputType | null
   _max: JobMaxAggregateOutputType | null
+}
+
+export type JobAvgAggregateOutputType = {
+  lease_time: number | null
+}
+
+export type JobSumAggregateOutputType = {
+  lease_time: number | null
 }
 
 export type JobMinAggregateOutputType = {
@@ -29,7 +39,7 @@ export type JobMinAggregateOutputType = {
   queue_name: string | null
   status: $Enums.JobStatus | null
   created_at: Date | null
-  lease_until: Date | null
+  lease_time: number | null
 }
 
 export type JobMaxAggregateOutputType = {
@@ -37,7 +47,7 @@ export type JobMaxAggregateOutputType = {
   queue_name: string | null
   status: $Enums.JobStatus | null
   created_at: Date | null
-  lease_until: Date | null
+  lease_time: number | null
 }
 
 export type JobCountAggregateOutputType = {
@@ -47,17 +57,25 @@ export type JobCountAggregateOutputType = {
   data: number
   status: number
   created_at: number
-  lease_until: number
+  lease_time: number
   _all: number
 }
 
+
+export type JobAvgAggregateInputType = {
+  lease_time?: true
+}
+
+export type JobSumAggregateInputType = {
+  lease_time?: true
+}
 
 export type JobMinAggregateInputType = {
   id?: true
   queue_name?: true
   status?: true
   created_at?: true
-  lease_until?: true
+  lease_time?: true
 }
 
 export type JobMaxAggregateInputType = {
@@ -65,7 +83,7 @@ export type JobMaxAggregateInputType = {
   queue_name?: true
   status?: true
   created_at?: true
-  lease_until?: true
+  lease_time?: true
 }
 
 export type JobCountAggregateInputType = {
@@ -75,7 +93,7 @@ export type JobCountAggregateInputType = {
   data?: true
   status?: true
   created_at?: true
-  lease_until?: true
+  lease_time?: true
   _all?: true
 }
 
@@ -117,6 +135,18 @@ export type JobAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: JobAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: JobSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: JobMinAggregateInputType
@@ -147,6 +177,8 @@ export type JobGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   take?: number
   skip?: number
   _count?: JobCountAggregateInputType | true
+  _avg?: JobAvgAggregateInputType
+  _sum?: JobSumAggregateInputType
   _min?: JobMinAggregateInputType
   _max?: JobMaxAggregateInputType
 }
@@ -158,8 +190,10 @@ export type JobGroupByOutputType = {
   data: runtime.JsonValue
   status: $Enums.JobStatus
   created_at: Date
-  lease_until: Date | null
+  lease_time: number | null
   _count: JobCountAggregateOutputType | null
+  _avg: JobAvgAggregateOutputType | null
+  _sum: JobSumAggregateOutputType | null
   _min: JobMinAggregateOutputType | null
   _max: JobMaxAggregateOutputType | null
 }
@@ -189,7 +223,7 @@ export type JobWhereInput = {
   data?: Prisma.JsonFilter<"Job">
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   created_at?: Prisma.DateTimeFilter<"Job"> | Date | string
-  lease_until?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  lease_time?: Prisma.IntNullableFilter<"Job"> | number | null
   queue?: Prisma.XOR<Prisma.QueueScalarRelationFilter, Prisma.QueueWhereInput>
 }
 
@@ -200,7 +234,7 @@ export type JobOrderByWithRelationInput = {
   data?: Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
-  lease_until?: Prisma.SortOrderInput | Prisma.SortOrder
+  lease_time?: Prisma.SortOrderInput | Prisma.SortOrder
   queue?: Prisma.QueueOrderByWithRelationInput
 }
 
@@ -214,7 +248,7 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   data?: Prisma.JsonFilter<"Job">
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   created_at?: Prisma.DateTimeFilter<"Job"> | Date | string
-  lease_until?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  lease_time?: Prisma.IntNullableFilter<"Job"> | number | null
   queue?: Prisma.XOR<Prisma.QueueScalarRelationFilter, Prisma.QueueWhereInput>
 }, "id">
 
@@ -225,10 +259,12 @@ export type JobOrderByWithAggregationInput = {
   data?: Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
-  lease_until?: Prisma.SortOrderInput | Prisma.SortOrder
+  lease_time?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.JobCountOrderByAggregateInput
+  _avg?: Prisma.JobAvgOrderByAggregateInput
   _max?: Prisma.JobMaxOrderByAggregateInput
   _min?: Prisma.JobMinOrderByAggregateInput
+  _sum?: Prisma.JobSumOrderByAggregateInput
 }
 
 export type JobScalarWhereWithAggregatesInput = {
@@ -241,7 +277,7 @@ export type JobScalarWhereWithAggregatesInput = {
   data?: Prisma.JsonWithAggregatesFilter<"Job">
   status?: Prisma.EnumJobStatusWithAggregatesFilter<"Job"> | $Enums.JobStatus
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
-  lease_until?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
+  lease_time?: Prisma.IntNullableWithAggregatesFilter<"Job"> | number | null
 }
 
 export type JobCreateInput = {
@@ -250,7 +286,7 @@ export type JobCreateInput = {
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status: $Enums.JobStatus
   created_at?: Date | string
-  lease_until?: Date | string | null
+  lease_time?: number | null
   queue: Prisma.QueueCreateNestedOneWithoutJobsInput
 }
 
@@ -261,7 +297,7 @@ export type JobUncheckedCreateInput = {
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status: $Enums.JobStatus
   created_at?: Date | string
-  lease_until?: Date | string | null
+  lease_time?: number | null
 }
 
 export type JobUpdateInput = {
@@ -270,7 +306,7 @@ export type JobUpdateInput = {
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lease_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lease_time?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   queue?: Prisma.QueueUpdateOneRequiredWithoutJobsNestedInput
 }
 
@@ -281,7 +317,7 @@ export type JobUncheckedUpdateInput = {
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lease_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lease_time?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type JobCreateManyInput = {
@@ -291,7 +327,7 @@ export type JobCreateManyInput = {
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status: $Enums.JobStatus
   created_at?: Date | string
-  lease_until?: Date | string | null
+  lease_time?: number | null
 }
 
 export type JobUpdateManyMutationInput = {
@@ -300,7 +336,7 @@ export type JobUpdateManyMutationInput = {
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lease_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lease_time?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type JobUncheckedUpdateManyInput = {
@@ -310,7 +346,7 @@ export type JobUncheckedUpdateManyInput = {
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lease_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lease_time?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type JobListRelationFilter = {
@@ -330,7 +366,11 @@ export type JobCountOrderByAggregateInput = {
   data?: Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
-  lease_until?: Prisma.SortOrder
+  lease_time?: Prisma.SortOrder
+}
+
+export type JobAvgOrderByAggregateInput = {
+  lease_time?: Prisma.SortOrder
 }
 
 export type JobMaxOrderByAggregateInput = {
@@ -338,7 +378,7 @@ export type JobMaxOrderByAggregateInput = {
   queue_name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
-  lease_until?: Prisma.SortOrder
+  lease_time?: Prisma.SortOrder
 }
 
 export type JobMinOrderByAggregateInput = {
@@ -346,7 +386,11 @@ export type JobMinOrderByAggregateInput = {
   queue_name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
-  lease_until?: Prisma.SortOrder
+  lease_time?: Prisma.SortOrder
+}
+
+export type JobSumOrderByAggregateInput = {
+  lease_time?: Prisma.SortOrder
 }
 
 export type JobCreateNestedManyWithoutQueueInput = {
@@ -395,8 +439,12 @@ export type EnumJobStatusFieldUpdateOperationsInput = {
   set?: $Enums.JobStatus
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type JobCreateWithoutQueueInput = {
@@ -405,7 +453,7 @@ export type JobCreateWithoutQueueInput = {
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status: $Enums.JobStatus
   created_at?: Date | string
-  lease_until?: Date | string | null
+  lease_time?: number | null
 }
 
 export type JobUncheckedCreateWithoutQueueInput = {
@@ -414,7 +462,7 @@ export type JobUncheckedCreateWithoutQueueInput = {
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status: $Enums.JobStatus
   created_at?: Date | string
-  lease_until?: Date | string | null
+  lease_time?: number | null
 }
 
 export type JobCreateOrConnectWithoutQueueInput = {
@@ -453,7 +501,7 @@ export type JobScalarWhereInput = {
   data?: Prisma.JsonFilter<"Job">
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   created_at?: Prisma.DateTimeFilter<"Job"> | Date | string
-  lease_until?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  lease_time?: Prisma.IntNullableFilter<"Job"> | number | null
 }
 
 export type JobCreateManyQueueInput = {
@@ -462,7 +510,7 @@ export type JobCreateManyQueueInput = {
   data: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status: $Enums.JobStatus
   created_at?: Date | string
-  lease_until?: Date | string | null
+  lease_time?: number | null
 }
 
 export type JobUpdateWithoutQueueInput = {
@@ -471,7 +519,7 @@ export type JobUpdateWithoutQueueInput = {
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lease_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lease_time?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type JobUncheckedUpdateWithoutQueueInput = {
@@ -480,7 +528,7 @@ export type JobUncheckedUpdateWithoutQueueInput = {
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lease_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lease_time?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type JobUncheckedUpdateManyWithoutQueueInput = {
@@ -489,7 +537,7 @@ export type JobUncheckedUpdateManyWithoutQueueInput = {
   data?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lease_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lease_time?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 
@@ -501,7 +549,7 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   data?: boolean
   status?: boolean
   created_at?: boolean
-  lease_until?: boolean
+  lease_time?: boolean
   queue?: boolean | Prisma.QueueDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["job"]>
 
@@ -512,7 +560,7 @@ export type JobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   data?: boolean
   status?: boolean
   created_at?: boolean
-  lease_until?: boolean
+  lease_time?: boolean
   queue?: boolean | Prisma.QueueDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["job"]>
 
@@ -523,7 +571,7 @@ export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   data?: boolean
   status?: boolean
   created_at?: boolean
-  lease_until?: boolean
+  lease_time?: boolean
   queue?: boolean | Prisma.QueueDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["job"]>
 
@@ -534,10 +582,10 @@ export type JobSelectScalar = {
   data?: boolean
   status?: boolean
   created_at?: boolean
-  lease_until?: boolean
+  lease_time?: boolean
 }
 
-export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "queue_name" | "metadata" | "data" | "status" | "created_at" | "lease_until", ExtArgs["result"]["job"]>
+export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "queue_name" | "metadata" | "data" | "status" | "created_at" | "lease_time", ExtArgs["result"]["job"]>
 export type JobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   queue?: boolean | Prisma.QueueDefaultArgs<ExtArgs>
 }
@@ -560,7 +608,7 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     data: runtime.JsonValue
     status: $Enums.JobStatus
     created_at: Date
-    lease_until: Date | null
+    lease_time: number | null
   }, ExtArgs["result"]["job"]>
   composites: {}
 }
@@ -991,7 +1039,7 @@ export interface JobFieldRefs {
   readonly data: Prisma.FieldRef<"Job", 'Json'>
   readonly status: Prisma.FieldRef<"Job", 'JobStatus'>
   readonly created_at: Prisma.FieldRef<"Job", 'DateTime'>
-  readonly lease_until: Prisma.FieldRef<"Job", 'DateTime'>
+  readonly lease_time: Prisma.FieldRef<"Job", 'Int'>
 }
     
 

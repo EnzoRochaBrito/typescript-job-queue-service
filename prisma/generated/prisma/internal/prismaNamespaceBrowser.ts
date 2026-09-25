@@ -86,7 +86,7 @@ export const JobScalarFieldEnum = {
   data: 'data',
   status: 'status',
   created_at: 'created_at',
-  lease_until: 'lease_until'
+  lease_time: 'lease_time'
 } as const
 
 export type JobScalarFieldEnum = (typeof JobScalarFieldEnum)[keyof typeof JobScalarFieldEnum]

@@ -2,8 +2,7 @@ import { QueueRegistry } from "../../domain/queue/queue.registry";
 import type { IQueueService } from "../../application/service/queue/queue.service.interface";
 import type { QProducerWorkerMessage } from "./queueProducer";
 import { Queue } from "../../domain/queue/queue";
-import { QueueService } from "../../../proto/jobqueue";
-import { JobQueueService } from "../../application/service/queue/queue.service";
+import { JobSupervisor, type LeasedJob } from "./job.supervisor";
 
 export class QueueProducer {
 
@@ -14,27 +13,30 @@ export class QueueProducer {
 
     constructor(
         private readonly queueService: IQueueService,
-        private readonly queueRegistry: QueueRegistry
+        private readonly queueRegistry: QueueRegistry,
+        private readonly jobSupervisor: JobSupervisor
     ) {
         this.queueProducerEmitter = new Worker(new URL("./queueProducer.ts", import.meta.url).href)
         this.queueProducerRecord = new Map()
+
         this.loadProducerHandler()
         this.init()
     }
 
     async popQueue(queue: Queue) {
 
-        if (!queue.isAvailable())
-            return
-
         const job = await this.queueService.pop(queue)
 
-        if (!job) {
-            this.recordToNoJob(queue.name)
+        if (!job)
             return false
+        
+        if (job.getMetadata().lease_time) {
+            this.jobSupervisor.registerLeasedJob({
+                jobID: job.ID,
+                leaseTime: job.getMetadata().lease_time!,
+                startedAt: Date.now()
+            })
         }
-
-        this.recordToJob(queue.name)
 
         queue.sendJob(job)
 
@@ -53,10 +55,10 @@ export class QueueProducer {
                 if (!producerRecord)
                     return
 
-                if (!await this.popQueue(queue))
-                    return
-
-                this.recordToJob(queue.name)
+                this.popQueue(queue)
+                    .then(success => {
+                        success ? this.recordToJob(queue.name) : this.recordToNoJob(queue.name) 
+                    })
             })
         }
     }
@@ -141,8 +143,11 @@ export class QueueProducer {
             this.recordToNoJob(queue)
 
         try {
+            
+            const queueInstance = this.queueRegistry.get(queue)!
 
-            this.popQueue(this.queueRegistry.get(queue)!)
+            if (queueInstance.isAvailable())
+                this.popQueue(this.queueRegistry.get(queue)!)
 
         } catch (error) {
             console.log(error)

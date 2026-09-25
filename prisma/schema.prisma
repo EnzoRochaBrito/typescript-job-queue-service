@@ -30,7 +30,8 @@ model Job {
   data Json
   status JobStatus
   created_at DateTime @default(now())
-  lease_until DateTime?
+  lease_time Int?
+  @@index([status])
   @@index([status, created_at])
-  @@index([status, lease_until])
+  @@index([status, lease_time])
 }
