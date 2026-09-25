@@ -77,12 +77,6 @@ export class JobSupervisor {
         const remainingTime = (poppedJob.startedAt + leaseTimeInMillisecond) - date
 
         if (remainingTime < 0) {
-
-            console.log("date", date)
-            console.log("poppedJob.startedAt", poppedJob.startedAt)
-            console.log("leaseTimeInMillisecond", leaseTimeInMillisecond)
-            console.log("remainingTime", remainingTime)
-
             this.triggerEvent!(poppedJob.jobID)
                 .then()
             setTimeout(()=>this.sleepForCurrentJob())
